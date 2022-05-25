@@ -238,6 +238,21 @@ veeamSessionId=$(curl -X POST "https://$veeamRestServer:$veeamRestPort/api/sessi
 veeamXRestSvcSessionId=$(echo -ne "$veeamSessionId" | base64);
 veeamJobId="763797f3-391c-46c8-aa81-83d04f534396"
 
+# Rubrik
+# https://rubrikinc.github.io/api-doc-v1-6.0/#section/Authentication/Authentication-session
+rubrikUsername=""
+rubrikPassword=""
+rubrikAuth=$(echo -ne "$rubrikUsername:$rubrikPassword" | base64); # maybe not needed? -u flags the string in the curl command
+rubrikRestServer="" # IP
+rubrikRestPort=""
+# curl -k -u admin:pass -X POST "https://$cluster_address/api/v1/session"
+token_id=curl -k -u admin:pass -X POST "https://$cluster_address/api/v1/session" | jq '.token'
+curl -k -H "Authorization: Bearer $token_id" -X GET "https://$cluster_address/api/v1/cluster/me"
+
+
+
+rubrikSessionId=$()
+
 # Query Job
 veeamEMJobUrl="https://$veeamRestServer:$veeamRestPort/api/nas/jobs/$veeamJobId?format=Entity"
 veeamEMJobDetailUrl=$(curl -X GET "$veeamEMJobUrl" -H "Accept:application/json" -H "X-RestSvcSessionId: $veeamXRestSvcSessionId" -H "Cookie: X-RestSvcSessionId=$veeamXRestSvcSessionId" -H "Content-Length: 0" -k -v | awk 'NR==1{sub(/^\xef\xbb\xbf/,"")}1')
