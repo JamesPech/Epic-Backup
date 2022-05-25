@@ -253,6 +253,18 @@ curl -k -H "Authorization: Bearer $token_id" -X GET "https://$cluster_address/ap
 
 rubrikSessionId=$()
 
+# Rubrik trigger backup
+# check in rest api explorer how to manage ahv vms
+# https://rubrikinc.github.io/api-doc-v1-6.0/#section/Virtual-machines/Snapshot-management
+# Get VM "https://$cluster_address/api/v1/vmware/vm"
+vm_id=...
+# Creating on demand snapshot
+request_id=curl -X POST "https://$cluster_address/api/v1/vmware/vm/$vm_id/snapshot" # jq '.id'
+# Check status
+curl -X GET "https://$cluster_address/api/v1/vmware/vm/request/$request_id" | jq '.status' # = SUCCEEDED, use while loop
+
+
+
 # Query Job
 veeamEMJobUrl="https://$veeamRestServer:$veeamRestPort/api/nas/jobs/$veeamJobId?format=Entity"
 veeamEMJobDetailUrl=$(curl -X GET "$veeamEMJobUrl" -H "Accept:application/json" -H "X-RestSvcSessionId: $veeamXRestSvcSessionId" -H "Cookie: X-RestSvcSessionId=$veeamXRestSvcSessionId" -H "Content-Length: 0" -k -v | awk 'NR==1{sub(/^\xef\xbb\xbf/,"")}1')
